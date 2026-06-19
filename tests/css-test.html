@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="../styles/danmaku.css">
+  <style>
+    body { background: #18181b; margin: 0; }
+    .container { position: relative; width: 800px; height: 450px; background: #000; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sr-overlay" id="overlay"></div>
+  </div>
+  <script>
+    const overlay = document.getElementById('overlay');
+    const span = document.createElement('span');
+    span.className = 'sr-danmaku';
+    span.textContent = 'Hello StreamRain!';
+    span.style.top = '50px';
+    span.style.color = '#9146FF';
+    span.style.fontSize = '18px';
+    span.style.animationDuration = '8s';
+    overlay.appendChild(span);
+  </script>
+</body>
+</html>

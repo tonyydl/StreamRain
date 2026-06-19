@@ -1,0 +1,33 @@
+@keyframes sr-fly {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(-100% - 100vw)); }
+}
+
+.sr-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.sr-danmaku {
+  position: absolute;
+  right: 0;
+  white-space: nowrap;
+  font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  font-weight: bold;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+  animation-name: sr-fly;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  line-height: 1;
+  user-select: none;
+}
