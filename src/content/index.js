@@ -2,12 +2,20 @@
   let overlay = null;
   let engine  = null;
   let observer = null;
+  let buttonReadyObs = null;
   const button = new ToggleButton();
 
   async function enable(settings) {
+    // Cancel the "waiting for player to inject button" observer if it's running
+    if (buttonReadyObs) {
+      buttonReadyObs.disconnect();
+      buttonReadyObs = null;
+    }
     if (!overlay) {
       overlay = new DanmakuOverlay();
-      const ok = await overlay.mount();
+      const ok = await overlay.mount(() => {
+        if (engine) engine._rebuildTracks();
+      });
       if (!ok) { overlay = null; return; }
     }
     if (!engine) {
@@ -39,14 +47,15 @@
       button.syncState(false);
       return;
     }
-    const obs = new MutationObserver(() => {
+    buttonReadyObs = new MutationObserver(() => {
       if (document.querySelector(SELECTORS.PLAYER_WRAPPER)) {
-        obs.disconnect();
+        buttonReadyObs.disconnect();
+        buttonReadyObs = null;
         button.inject();
         button.syncState(false);
       }
     });
-    obs.observe(document.body, { childList: true, subtree: true });
+    buttonReadyObs.observe(document.body, { childList: true, subtree: true });
   }
 
   // Bug 4: Register BEFORE any await so popup changes during mount retries are caught

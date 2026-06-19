@@ -8,7 +8,7 @@ class DanmakuOverlay {
     this._resizeObserver = null;
   }
 
-  async mount() {
+  async mount(onResize) {
     const delays = [500, 1000, 2000, 4000, 8000];
     for (let i = 0; i < delays.length; i++) {
       const playerWrapper = document.querySelector(SELECTORS.PLAYER_WRAPPER);
@@ -17,7 +17,10 @@ class DanmakuOverlay {
         this._div.className = 'sr-overlay';
         playerWrapper.style.position = 'relative';
         playerWrapper.appendChild(this._div);
-        this._resizeObserver = new ResizeObserver(() => this._syncSize(playerWrapper));
+        this._resizeObserver = new ResizeObserver(() => {
+          this._syncSize(playerWrapper);
+          if (onResize) onResize();
+        });
         this._resizeObserver.observe(playerWrapper);
         this._syncSize(playerWrapper);
         return true;
