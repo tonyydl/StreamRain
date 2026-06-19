@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>StreamRain</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <span>🌧</span>
+    <h1>StreamRain</h1>
+  </header>
+
+  <div class="row">
+    <label for="toggle-enabled">彈幕開關</label>
+    <label class="switch">
+      <input type="checkbox" id="toggle-enabled">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="row">
+    <label for="opacity-slider">透明度 <span id="opacity-val">80%</span></label>
+    <input type="range" id="opacity-slider" min="10" max="100" step="5" value="80">
+  </div>
+
+  <div class="row">
+    <label for="speed-select">速度</label>
+    <select id="speed-select">
+      <option value="slow">慢</option>
+      <option value="medium" selected>中</option>
+      <option value="fast">快</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <label for="font-select">字體大小</label>
+    <select id="font-select">
+      <option value="small">小</option>
+      <option value="medium" selected>中</option>
+      <option value="large">大</option>
+    </select>
+  </div>
+
+  <div class="section-title">角色顏色</div>
+
+  <div class="row">
+    <label><span class="color-label">MOD</span></label>
+    <input type="color" id="color-mod" value="#00C000">
+  </div>
+  <div class="row">
+    <label><span class="color-label">訂閱者</span></label>
+    <input type="color" id="color-subscriber" value="#9146FF">
+  </div>
+  <div class="row">
+    <label><span class="color-label">VIP</span></label>
+    <input type="color" id="color-vip" value="#F5A623">
+  </div>
+  <div class="row">
+    <label><span class="color-label">一般</span></label>
+    <input type="color" id="color-general" value="#FFFFFF">
+  </div>
+
+  <script src="../vendor/browser-polyfill.min.js"></script>
+  <script src="../shared/constants.js"></script>
+  <script src="../shared/storage.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
