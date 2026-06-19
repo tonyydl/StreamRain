@@ -66,18 +66,18 @@
     assert('long message duration >= 10s',  long >= 10);
   }
 
-  // --- Test: queue cap at 50 ---
+  // --- Test: queue cap at 50 via push() ---
   {
-    const engine = new DanmakuEngine(mockOverlay(0, 0)); // height 0 → no tracks → all queued
+    // height=0 → _rebuildTracks() produces 0 tracks → _flush() immediately breaks
+    // (no free track found) and messages remain in queue, so we can inspect synchronously
+    const engine = new DanmakuEngine(mockOverlay(800, 0));
     engine.applySettings({ ...DEFAULT_SETTINGS });
-    engine._tracks = []; // force no tracks so everything queues
-    for (let i = 0; i < 60; i++) {
-      engine._queue.push({ username: 'u', message: 'msg' + i, badge: '' });
-      if (engine._queue.length > 50) engine._queue.shift();
-    }
+    for (let i = 0; i < 60; i++) engine.push({ username: 'u', message: 'msg' + i, badge: '' });
+    // push() enforces the cap synchronously (shift before push); _flush runs via
+    // setTimeout(0) so queue is still full when we check here
     assert('queue capped at 50', engine._queue.length === 50);
-    assert('oldest entry dropped (msg10)',
-      engine._queue[0].message === 'msg10');
+    assert('oldest entry dropped (msg10)', engine._queue[0].message === 'msg10');
+    engine.destroy();
   }
 
   // --- Summary ---
