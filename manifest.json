@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "StreamRain",
+  "version": "1.0.0",
+  "description": "Twitch chat as danmaku overlay — right to left, on your stream.",
+  "icons": {
+    "16":  "icons/icon16.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://www.twitch.tv/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://www.twitch.tv/*"],
+      "js": [
+        "src/vendor/browser-polyfill.min.js",
+        "src/shared/constants.js",
+        "src/shared/storage.js",
+        "src/content/danmaku-overlay.js",
+        "src/content/danmaku-engine.js",
+        "src/content/chat-observer.js",
+        "src/content/toggle-button.js",
+        "src/content/index.js"
+      ],
+      "css": ["styles/danmaku.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "src/background/service-worker.js"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16":  "icons/icon16.png",
+      "48":  "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "streamrain@extension",
+      "strict_min_version": "109.0"
+    }
+  }
+}
