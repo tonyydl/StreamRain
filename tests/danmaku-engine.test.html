@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head><title>DanmakuEngine Tests</title>
+<style>
+  body { font-family: monospace; background: #111; color: #eee; padding: 20px; }
+  .pass { color: #0f0; } .fail { color: #f44; }
+</style>
+</head>
+<body>
+<h2>DanmakuEngine Tests</h2>
+<div id="results"></div>
+
+<script src="../src/shared/constants.js"></script>
+<script src="../src/content/danmaku-engine.js"></script>
+<script>
+  const results = document.getElementById('results');
+  let passed = 0, failed = 0;
+
+  function assert(label, condition) {
+    const el = document.createElement('div');
+    if (condition) {
+      el.className = 'pass'; el.textContent = '✓ ' + label; passed++;
+    } else {
+      el.className = 'fail'; el.textContent = '✗ ' + label; failed++;
+    }
+    results.appendChild(el);
+  }
+
+  // Mock overlay that reports fixed dimensions
+  function mockOverlay(width, height) {
+    const spans = [];
+    return {
+      getWidth:    () => width,
+      getHeight:   () => height,
+      appendSpan:  (s) => spans.push(s),
+      _spans:      spans,
+    };
+  }
+
+  // --- Test: track count calculation ---
+  {
+    const engine = new DanmakuEngine(mockOverlay(800, 450));
+    engine.applySettings({ ...DEFAULT_SETTINGS });
+    engine._rebuildTracks();
+    // fontSize medium = 18px, padding 6 → 24px per track, 450/24 = 18 tracks
+    assert('track count: 450px height / 24px = 18 tracks', engine._tracks.length === 18);
+  }
+
+  // --- Test: color lookup ---
+  {
+    const engine = new DanmakuEngine(mockOverlay(800, 450));
+    engine.applySettings({ ...DEFAULT_SETTINGS, colors: DEFAULT_SETTINGS.colors });
+    assert('MOD color is green',      engine._colorForBadge('moderator') === '#00C000');
+    assert('subscriber color purple', engine._colorForBadge('subscriber') === '#9146FF');
+    assert('VIP color yellow',        engine._colorForBadge('vip')        === '#F5A623');
+    assert('general color white',     engine._colorForBadge('')           === '#FFFFFF');
+  }
+
+  // --- Test: duration scaling ---
+  {
+    const engine = new DanmakuEngine(mockOverlay(800, 450));
+    engine.applySettings({ ...DEFAULT_SETTINGS, speed: 'medium' });
+    const short = engine._durationForText('Hi');        // 2 chars → 8 + 0 = 8
+    const long  = engine._durationForText('A'.repeat(20)); // 20 chars → 8 + 2 = 10
+    assert('short message duration is 8s',  short === 8);
+    assert('long message duration >= 10s',  long >= 10);
+  }
+
+  // --- Test: queue cap at 50 ---
+  {
+    const engine = new DanmakuEngine(mockOverlay(0, 0)); // height 0 → no tracks → all queued
+    engine.applySettings({ ...DEFAULT_SETTINGS });
+    engine._tracks = []; // force no tracks so everything queues
+    for (let i = 0; i < 60; i++) {
+      engine._queue.push({ username: 'u', message: 'msg' + i, badge: '' });
+      if (engine._queue.length > 50) engine._queue.shift();
+    }
+    assert('queue capped at 50', engine._queue.length === 50);
+    assert('oldest entry dropped (msg10)',
+      engine._queue[0].message === 'msg10');
+  }
+
+  // --- Summary ---
+  const summary = document.createElement('p');
+  summary.textContent = `${passed} passed, ${failed} failed`;
+  summary.style.color = failed > 0 ? '#f44' : '#0f0';
+  results.appendChild(summary);
+</script>
+</body>
+</html>
