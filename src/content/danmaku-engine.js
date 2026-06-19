@@ -8,22 +8,25 @@ class DanmakuEngine {
     this._tracks = [];       // array of { freeAt: timestamp, index: number }
     this._queue = [];        // FIFO, capped at 50
     this._settings = {
-      opacity: 0.8,
-      speed: 'medium',
-      fontSize: 'medium',
-      colors: { mod: '#00C000', subscriber: '#9146FF', vip: '#F5A623', general: '#FFFFFF' },
+      opacity:  DEFAULT_SETTINGS.opacity,
+      speed:    DEFAULT_SETTINGS.speed,
+      fontSize: DEFAULT_SETTINGS.fontSize,
+      colors:   { ...DEFAULT_SETTINGS.colors },
     };
     this._fontSizePx = 18;   // cached from FONT_SIZE_MAP; updated in _rebuildTracks
     this._dispatchTimer = null;
   }
 
   applySettings(settings) {
+    const prevFontSize = this._settings.fontSize;
     this._settings = {
       ...this._settings,
       ...settings,
       colors: { ...this._settings.colors, ...(settings.colors || {}) },
     };
-    this._rebuildTracks();
+    if (this._settings.fontSize !== prevFontSize || this._tracks.length === 0) {
+      this._rebuildTracks();
+    }
   }
 
   _rebuildTracks() {
@@ -35,9 +38,9 @@ class DanmakuEngine {
 
   _colorForBadge(badge) {
     const c = this._settings.colors;
-    if (badge === 'moderator')  return c.mod;
-    if (badge === 'subscriber') return c.subscriber;
-    if (badge === 'vip')        return c.vip;
+    if (badge === 'moderator')          return c.mod;
+    if (badge.includes('subscriber'))   return c.subscriber;
+    if (badge === 'vip')                return c.vip;
     return c.general;
   }
 
@@ -108,11 +111,18 @@ class DanmakuEngine {
     const overlayWidth = this._overlay.getWidth();
     if (overlayWidth <= 0) return;
 
+    // Bug 1: set travel distance so the keyframe uses the actual overlay width
+    span.style.setProperty('--sr-travel', overlayWidth + 'px');
+
     this._overlay.appendSpan(span);
 
-    // mark track busy for the full animation duration — the leading edge of the
-    // message takes exactly `duration` seconds to traverse the overlay width
-    track.freeAt = Date.now() + (duration * 1000);
+    // Bug 5: mark the track free once the trailing edge of this message clears the
+    // entry point (right edge of overlay) — not after the full animation
+    const approxTextWidth = msg.message.length * fontSizePx * 0.6;
+    const travelPx = overlayWidth + approxTextWidth;
+    const msPerPx = (duration * 1000) / travelPx;
+    const clearanceMs = Math.max(500, approxTextWidth * msPerPx);
+    track.freeAt = Date.now() + clearanceMs;
   }
 
   destroy() {

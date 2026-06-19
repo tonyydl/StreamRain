@@ -1,6 +1,6 @@
 @keyframes sr-fly {
   from { transform: translateX(0); }
-  to   { transform: translateX(calc(-100% - 100vw)); }
+  to   { transform: translateX(calc(-100% - var(--sr-travel, 800px))); }
 }
 
 .sr-overlay {
@@ -16,7 +16,8 @@
 
 .sr-danmaku {
   position: absolute;
-  right: 0;
+  left: 100%;
+  right: auto;
   white-space: nowrap;
   font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
   font-weight: bold;

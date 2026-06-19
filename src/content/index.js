@@ -31,16 +31,25 @@
     button.syncState(false);
   }
 
-  // Bootstrap on load
-  const settings = await getSettings();
-  if (settings.enabled) {
-    await enable(settings);
-  } else {
-    button.inject();
-    button.syncState(false);
+  // Bug 7: retry injecting the button until the player wrapper is in the DOM
+  function injectButtonWhenReady() {
+    const wrapper = document.querySelector(SELECTORS.PLAYER_WRAPPER);
+    if (wrapper) {
+      button.inject();
+      button.syncState(false);
+      return;
+    }
+    const obs = new MutationObserver(() => {
+      if (document.querySelector(SELECTORS.PLAYER_WRAPPER)) {
+        obs.disconnect();
+        button.inject();
+        button.syncState(false);
+      }
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
   }
 
-  // React to settings changes (from popup or toggle button)
+  // Bug 4: Register BEFORE any await so popup changes during mount retries are caught
   onSettingsChanged(async (newSettings) => {
     if (newSettings.enabled) {
       await enable(newSettings);
@@ -49,4 +58,12 @@
       button.inject(); // keep button visible even when disabled
     }
   });
+
+  // Bootstrap on load
+  const settings = await getSettings();
+  if (settings.enabled) {
+    await enable(settings);
+  } else {
+    injectButtonWhenReady();
+  }
 })();

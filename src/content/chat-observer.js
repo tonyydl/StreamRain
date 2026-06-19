@@ -35,6 +35,18 @@ class ChatObserver {
       }
     });
     this._chatObserver.observe(container, { childList: true, subtree: true });
+
+    // Watch for SPA removal of the chat container
+    this._bodyObserver = new MutationObserver(() => {
+      if (!document.contains(container)) {
+        this._chatObserver.disconnect();
+        this._chatObserver = null;
+        this._bodyObserver.disconnect();
+        this._bodyObserver = null;
+        this._watchForContainer();
+      }
+    });
+    this._bodyObserver.observe(document.body, { childList: true, subtree: true });
   }
 
   _watchForContainer() {
@@ -54,7 +66,10 @@ class ChatObserver {
     const badgeEl    = lineEl.querySelector(SELECTORS.BADGE);
 
     const username = usernameEl ? (usernameEl.getAttribute('data-a-user') || '') : '';
-    const message  = lineEl.textContent.replace(username, '').trim();
+    const rawText  = lineEl.textContent;
+    const message  = username
+      ? rawText.replace(new RegExp(username, 'i'), '').trim()
+      : rawText.trim();
     const badge    = badgeEl ? (badgeEl.getAttribute('alt') || '').toLowerCase() : '';
 
     return { username, message, badge };
