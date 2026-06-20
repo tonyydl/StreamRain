@@ -142,10 +142,14 @@ class ChatObserver {
     const parsed = this._parseIrc(line);
     if (!parsed || parsed.command !== 'PRIVMSG') return;
 
+    // room-id is the channel's numeric Twitch ID — used to fetch its 7TV set.
+    if (parsed.tags['room-id']) EmoteCache.loadForRoom(parsed.tags['room-id']);
+
     const msg = {
       username: parsed.displayName || parsed.nick || '',
       message:  parsed.text || '',
       badge:    this._roleFromBadges(parsed.tags.badges || ''),
+      emotes:   parseTwitchEmotes(parsed.tags.emotes),
     };
     if (!msg.message) return;
     this._onMessage(msg);

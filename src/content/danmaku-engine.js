@@ -31,9 +31,14 @@ class DanmakuEngine {
 
   _rebuildTracks() {
     this._fontSizePx = FONT_SIZE_MAP[this._settings.fontSize] || 18;
-    const trackHeight = this._fontSizePx + 6;
-    const count = Math.max(1, Math.floor(this._overlay.getHeight() / trackHeight));
+    // Tracks must fit emotes (taller than text) without overlapping neighbours.
+    this._trackHeight = this._emoteHeight() + 6;
+    const count = Math.max(1, Math.floor(this._overlay.getHeight() / this._trackHeight));
     this._tracks = Array.from({ length: count }, (_, i) => ({ freeAt: 0, index: i }));
+  }
+
+  _emoteHeight() {
+    return Math.round(this._fontSizePx * 1.25);
   }
 
   _colorForBadge(badge) {
@@ -42,6 +47,49 @@ class DanmakuEngine {
     if (badge.includes('subscriber'))   return c.subscriber;
     if (badge === 'vip')                return c.vip;
     return c.general;
+  }
+
+  // Build span content: text with Twitch (by position range) and 7TV (by word)
+  // emotes turned into <img>. Falls back to plain text when there are no emotes.
+  _renderContent(span, msg, fontSizePx) {
+    const map = EmoteCache.sevenTv;
+    const emotes = (msg.emotes || []).slice().sort((a, b) => a.start - b.start);
+    if (!emotes.length) {
+      this._appendText(span, msg.message, map, fontSizePx);
+      return;
+    }
+    // Twitch positions are codepoint indices — split accordingly, not by UTF-16 unit.
+    const chars = Array.from(msg.message);
+    let cursor = 0;
+    for (const e of emotes) {
+      if (e.start > cursor) {
+        this._appendText(span, chars.slice(cursor, e.start).join(''), map, fontSizePx);
+      }
+      const code = chars.slice(e.start, e.end + 1).join('');
+      span.appendChild(this._emoteImg(EmoteCache.twitchUrl(e.id), code, fontSizePx));
+      cursor = e.end + 1;
+    }
+    if (cursor < chars.length) {
+      this._appendText(span, chars.slice(cursor).join(''), map, fontSizePx);
+    }
+  }
+
+  _appendText(span, text, map, fontSizePx) {
+    if (!text) return;
+    for (const part of text.split(/(\s+)/)) {
+      if (!part) continue;
+      if (map[part]) span.appendChild(this._emoteImg(map[part], part, fontSizePx));
+      else span.appendChild(document.createTextNode(part));
+    }
+  }
+
+  _emoteImg(url, alt, fontSizePx) {
+    const img = document.createElement('img');
+    img.className = 'sr-emote';
+    img.src = url;
+    img.alt = alt;
+    img.style.height = this._emoteHeight() + 'px';
+    return img;
   }
 
   _durationForText(text) {
@@ -96,11 +144,11 @@ class DanmakuEngine {
 
     const span = document.createElement('span');
     span.className = 'sr-danmaku';
-    span.textContent = msg.message;
+    this._renderContent(span, msg, fontSizePx);
     span.style.fontSize          = fontSizePx + 'px';
     span.style.color             = color;
     span.style.opacity           = String(this._settings.opacity);
-    span.style.top               = (trackIndex * (fontSizePx + 6)) + 'px';
+    span.style.top               = (trackIndex * this._trackHeight) + 'px';
     span.style.animationDuration = duration + 's';
 
     span.addEventListener('animationend', () => {

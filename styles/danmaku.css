@@ -35,3 +35,8 @@
   line-height: 1;
   user-select: none;
 }
+
+.sr-emote {
+  vertical-align: middle;
+  margin: 0 1px;
+}
