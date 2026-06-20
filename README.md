@@ -15,6 +15,7 @@ player, and a popup gives you fine-grained control over the look.
 
 - **Danmaku overlay** — chat messages scroll right-to-left over the video, in lanes that avoid overlap.
 - **Role-based colors** — Moderator/Broadcaster = green, Subscriber = purple, VIP = yellow, everyone else = white. All colors are customizable.
+- **Emotes as images** — Twitch native emotes and 7TV emotes (channel + global) render as images in the danmaku, not as text codes.
 - **Shows every message** — no filtering.
 - **In-player toggle** — a `彈` button in the bottom-right corner turns danmaku on/off instantly.
 - **Popup settings** — opacity, speed (slow/medium/fast), font size (small/medium/large), and per-role colors. Settings sync across your browsers via `storage.sync`.
@@ -76,7 +77,7 @@ not affected by Twitch's markup changes.
 ## Privacy
 
 - **Read-only & anonymous.** StreamRain joins chat as an anonymous viewer and never sends messages, logs in, or transmits your identity.
-- **No external servers.** It talks only to Twitch. There is no StreamRain backend, analytics, or telemetry.
+- **No StreamRain servers.** It talks only to Twitch and the public 7tv.io API (to fetch the channel's emote list). There is no StreamRain backend, analytics, or telemetry.
 - **Local settings only.** Your preferences live in the browser's `storage.sync` and never leave Twitch + your browser sync.
 
 ---
