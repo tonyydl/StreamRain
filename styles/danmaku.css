@@ -39,4 +39,6 @@
 .sr-emote {
   vertical-align: middle;
   margin: 0 1px;
+  width: auto !important;
+  max-width: none !important;
 }

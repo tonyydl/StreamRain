@@ -88,7 +88,8 @@ class DanmakuEngine {
     img.className = 'sr-emote';
     img.src = url;
     img.alt = alt;
-    img.style.height = this._emoteHeight() + 'px';
+    // !important so host-page (Twitch/7TV) img rules can't override the size.
+    img.style.setProperty('height', this._emoteHeight() + 'px', 'important');
     return img;
   }
 
