@@ -12,12 +12,77 @@
 
 const IRC_URL = 'wss://irc-ws.chat.twitch.tv:443';
 
+function nextReconnectDelayMs(attempt) {
+  return Math.min(30000, 3000 * Math.pow(2, attempt));
+}
+
+// Parse an IRCv3 line: "@tags :prefix COMMAND params :trailing"
+function parseIrcLine(line) {
+  let rest = line;
+  const tags = {};
+
+  // Tags
+  if (rest[0] === '@') {
+    const sp = rest.indexOf(' ');
+    const tagStr = rest.slice(1, sp);
+    rest = rest.slice(sp + 1);
+    for (const pair of tagStr.split(';')) {
+      const eq = pair.indexOf('=');
+      if (eq === -1) { tags[pair] = ''; continue; }
+      tags[pair.slice(0, eq)] = pair.slice(eq + 1);
+    }
+  }
+
+  // Prefix
+  let nick = '';
+  if (rest[0] === ':') {
+    const sp = rest.indexOf(' ');
+    const prefix = rest.slice(1, sp);
+    rest = rest.slice(sp + 1);
+    const bang = prefix.indexOf('!');
+    nick = bang === -1 ? prefix : prefix.slice(0, bang);
+  }
+
+  // Command + params
+  const sp = rest.indexOf(' ');
+  const command = sp === -1 ? rest : rest.slice(0, sp);
+  let params = sp === -1 ? '' : rest.slice(sp + 1);
+
+  // Trailing message text (after " :")
+  let text = '';
+  const colon = params.indexOf(':');
+  if (colon !== -1) {
+    text = params.slice(colon + 1);
+  }
+
+  return {
+    tags,
+    nick,
+    command,
+    text,
+    displayName: tags['display-name'] || '',
+  };
+}
+
+// badges tag looks like "moderator/1,subscriber/12" or "vip/1,subscriber/6".
+// Map to the single role string DanmakuEngine._colorForBadge expects.
+// Priority: broadcaster/moderator (green) > vip (yellow) > subscriber (purple).
+function roleFromBadges(badges) {
+  if (!badges) return '';
+  const keys = badges.split(',').map(b => b.split('/')[0]);
+  if (keys.includes('broadcaster') || keys.includes('moderator')) return 'moderator';
+  if (keys.includes('vip')) return 'vip';
+  if (keys.includes('subscriber')) return 'subscriber';
+  return '';
+}
+
 class ChatObserver {
   constructor(onMessage) {
     this._onMessage     = onMessage;
     this._ws            = null;
     this._channel       = null;   // current joined channel (lowercase, no '#')
     this._reconnectTimer = null;
+    this._reconnectAttempt = 0;
     this._channelTimer  = null;
     this._stopped       = false;
   }
@@ -89,6 +154,7 @@ class ChatObserver {
     this._ws = ws;
 
     ws.onopen = () => {
+      this._reconnectAttempt = 0;
       // Request tags (badges, display-name) and command capabilities.
       this._send('CAP REQ :twitch.tv/tags twitch.tv/commands');
       // Anonymous login — any justinfan<number> nick, no password required.
@@ -118,10 +184,12 @@ class ChatObserver {
 
   _scheduleReconnect() {
     if (this._stopped || this._reconnectTimer) return;
+    const delay = nextReconnectDelayMs(this._reconnectAttempt);
+    this._reconnectAttempt += 1;
     this._reconnectTimer = setTimeout(() => {
       this._reconnectTimer = null;
       this._connect();
-    }, 3000);
+    }, delay);
   }
 
   _send(raw) {
@@ -155,63 +223,15 @@ class ChatObserver {
     this._onMessage(msg);
   }
 
-  // Parse an IRCv3 line: "@tags :prefix COMMAND params :trailing"
   _parseIrc(line) {
-    let rest = line;
-    const tags = {};
-
-    // Tags
-    if (rest[0] === '@') {
-      const sp = rest.indexOf(' ');
-      const tagStr = rest.slice(1, sp);
-      rest = rest.slice(sp + 1);
-      for (const pair of tagStr.split(';')) {
-        const eq = pair.indexOf('=');
-        if (eq === -1) { tags[pair] = ''; continue; }
-        tags[pair.slice(0, eq)] = pair.slice(eq + 1);
-      }
-    }
-
-    // Prefix
-    let nick = '';
-    if (rest[0] === ':') {
-      const sp = rest.indexOf(' ');
-      const prefix = rest.slice(1, sp);
-      rest = rest.slice(sp + 1);
-      const bang = prefix.indexOf('!');
-      nick = bang === -1 ? prefix : prefix.slice(0, bang);
-    }
-
-    // Command + params
-    const sp = rest.indexOf(' ');
-    const command = sp === -1 ? rest : rest.slice(0, sp);
-    let params = sp === -1 ? '' : rest.slice(sp + 1);
-
-    // Trailing message text (after " :")
-    let text = '';
-    const colon = params.indexOf(':');
-    if (colon !== -1) {
-      text = params.slice(colon + 1);
-    }
-
-    return {
-      tags,
-      nick,
-      command,
-      text,
-      displayName: tags['display-name'] || '',
-    };
+    return parseIrcLine(line);
   }
 
-  // badges tag looks like "moderator/1,subscriber/12" or "vip/1,subscriber/6".
-  // Map to the single role string DanmakuEngine._colorForBadge expects.
-  // Priority: broadcaster/moderator (green) > vip (yellow) > subscriber (purple).
   _roleFromBadges(badges) {
-    if (!badges) return '';
-    const keys = badges.split(',').map(b => b.split('/')[0]);
-    if (keys.includes('broadcaster') || keys.includes('moderator')) return 'moderator';
-    if (keys.includes('vip')) return 'vip';
-    if (keys.includes('subscriber')) return 'subscriber';
-    return '';
+    return roleFromBadges(badges);
   }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { ChatObserver, parseIrcLine, roleFromBadges, nextReconnectDelayMs };
 }

@@ -33,9 +33,9 @@ const EmoteCache = {
   // danmaku still renders text.
   async loadForRoom(roomId) {
     if (!roomId || this._loadedRoom === roomId) return;
-    this._loadedRoom = roomId;
 
     const map = {};
+    let hadFetchFailure = false;
     const add = (list) => {
       for (const e of list || []) {
         const host = e.data && e.data.host;
@@ -46,13 +46,14 @@ const EmoteCache = {
     try {
       const g = await fetch('https://7tv.io/v3/emote-sets/global').then(r => r.ok ? r.json() : null);
       if (g) add(g.emotes);
-    } catch (e) { /* ignore */ }
+    } catch (e) { hadFetchFailure = true; }
     try {
       const u = await fetch(`https://7tv.io/v3/users/twitch/${roomId}`).then(r => r.ok ? r.json() : null);
       if (u && u.emote_set) add(u.emote_set.emotes);
-    } catch (e) { /* ignore */ }
+    } catch (e) { hadFetchFailure = true; }
 
     this.sevenTv = map;
+    if (!hadFetchFailure) this._loadedRoom = roomId;
   },
 };
 

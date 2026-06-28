@@ -167,10 +167,13 @@ class DanmakuEngine {
 
     // Bug 5: mark the track free once the trailing edge of this message clears the
     // entry point (right edge of overlay) — not after the full animation
-    const approxTextWidth = msg.message.length * fontSizePx * 0.6;
-    const travelPx = overlayWidth + approxTextWidth;
+    const measuredWidth = span.getBoundingClientRect
+      ? span.getBoundingClientRect().width
+      : span.offsetWidth;
+    const textWidth = measuredWidth || (msg.message.length * fontSizePx * 0.6);
+    const travelPx = overlayWidth + textWidth;
     const msPerPx = (duration * 1000) / travelPx;
-    const clearanceMs = Math.max(500, approxTextWidth * msPerPx);
+    const clearanceMs = Math.max(500, textWidth * msPerPx);
     track.freeAt = Date.now() + clearanceMs;
   }
 
@@ -182,4 +185,8 @@ class DanmakuEngine {
     this._queue = [];
     this._tracks = [];
   }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { DanmakuEngine };
 }

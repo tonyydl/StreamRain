@@ -1,5 +1,22 @@
+function createDebouncedSettingsWriter(writeSettings, delayMs = 200) {
+  let timer = null;
+  let latest = null;
+
+  return (partial) => {
+    latest = { ...(latest || {}), ...partial };
+    if (timer !== null) clearTimeout(timer);
+    timer = setTimeout(() => {
+      timer = null;
+      const pending = latest;
+      latest = null;
+      writeSettings(pending);
+    }, delayMs);
+  };
+}
+
 async function init() {
   const settings = await getSettings();
+  const writeSettingsDebounced = createDebouncedSettingsWriter(setSettings);
 
   const elEnabled    = document.getElementById('toggle-enabled');
   const elOpacity    = document.getElementById('opacity-slider');
@@ -28,7 +45,7 @@ async function init() {
 
   elOpacity.addEventListener('input', () => {
     elOpacityVal.textContent = elOpacity.value + '%';
-    setSettings({ opacity: elOpacity.value / 100 });
+    writeSettingsDebounced({ opacity: elOpacity.value / 100 });
   });
 
   elSpeed.addEventListener('change', () =>
@@ -45,11 +62,27 @@ async function init() {
       general:    elGeneral.value,
     },
   });
+  const updateColorsDebounced = () => writeSettingsDebounced({
+    colors: {
+      mod:        elMod.value,
+      subscriber: elSub.value,
+      vip:        elVip.value,
+      general:    elGeneral.value,
+    },
+  });
 
-  elMod.addEventListener('input', updateColors);
-  elSub.addEventListener('input', updateColors);
-  elVip.addEventListener('input', updateColors);
-  elGeneral.addEventListener('input', updateColors);
+  elMod.addEventListener('change', updateColors);
+  elSub.addEventListener('change', updateColors);
+  elVip.addEventListener('change', updateColors);
+  elGeneral.addEventListener('change', updateColors);
+  elMod.addEventListener('input', updateColorsDebounced);
+  elSub.addEventListener('input', updateColorsDebounced);
+  elVip.addEventListener('input', updateColorsDebounced);
+  elGeneral.addEventListener('input', updateColorsDebounced);
 }
 
-init();
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { createDebouncedSettingsWriter };
+} else {
+  init();
+}
