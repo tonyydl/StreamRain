@@ -10,6 +10,7 @@ const TEST_FILES = [
   'manifest.test.js',
   'popup-debounce.test.js',
   'popup-markup.test.js',
+  'popup-reset.test.js',
 ].sort();
 
 function runAll() {

@@ -14,6 +14,13 @@ function createDebouncedSettingsWriter(writeSettings, delayMs = 200) {
   };
 }
 
+function createResetSettings(defaultSettings) {
+  return {
+    ...defaultSettings,
+    colors: { ...defaultSettings.colors },
+  };
+}
+
 async function init() {
   const settings = await getSettings();
   const writeSettingsDebounced = createDebouncedSettingsWriter(setSettings);
@@ -29,19 +36,24 @@ async function init() {
   const elSub        = document.getElementById('color-subscriber');
   const elVip        = document.getElementById('color-vip');
   const elGeneral    = document.getElementById('color-general');
+  const elReset      = document.getElementById('reset-settings');
+
+  const populate = (nextSettings) => {
+    elEnabled.checked  = nextSettings.enabled;
+    elOpacity.value    = Math.round(nextSettings.opacity * 100);
+    elOpacityVal.textContent = elOpacity.value + '%';
+    elSpeed.value      = nextSettings.speed;
+    elFont.value       = nextSettings.fontSize;
+    elDensity.value    = nextSettings.density;
+    elDisplayRange.value = nextSettings.displayRange;
+    elMod.value        = nextSettings.colors.mod;
+    elSub.value        = nextSettings.colors.subscriber;
+    elVip.value        = nextSettings.colors.vip;
+    elGeneral.value    = nextSettings.colors.general;
+  };
 
   // Populate from storage
-  elEnabled.checked  = settings.enabled;
-  elOpacity.value    = Math.round(settings.opacity * 100);
-  elOpacityVal.textContent = elOpacity.value + '%';
-  elSpeed.value      = settings.speed;
-  elFont.value       = settings.fontSize;
-  elDensity.value    = settings.density;
-  elDisplayRange.value = settings.displayRange;
-  elMod.value        = settings.colors.mod;
-  elSub.value        = settings.colors.subscriber;
-  elVip.value        = settings.colors.vip;
-  elGeneral.value    = settings.colors.general;
+  populate(settings);
 
   // Wire up changes — each writes to storage immediately
   elEnabled.addEventListener('change', () =>
@@ -89,10 +101,16 @@ async function init() {
   elSub.addEventListener('input', updateColorsDebounced);
   elVip.addEventListener('input', updateColorsDebounced);
   elGeneral.addEventListener('input', updateColorsDebounced);
+
+  elReset.addEventListener('click', async () => {
+    const resetSettings = createResetSettings(DEFAULT_SETTINGS);
+    populate(resetSettings);
+    await setSettings(resetSettings);
+  });
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { createDebouncedSettingsWriter };
+  module.exports = { createDebouncedSettingsWriter, createResetSettings };
 } else {
   init();
 }

@@ -12,5 +12,6 @@ assert.match(html, /value="high"/);
 assert.match(html, /value="half"/);
 assert.match(html, /value="threeQuarter"/);
 assert.match(html, /value="full"/);
+assert.match(html, /id="reset-settings"/);
 
 console.log('ok');

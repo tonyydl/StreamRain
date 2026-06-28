@@ -57,6 +57,7 @@ The extension is not yet on the stores, so load it manually.
   - **彈幕密度 (Density)** — low / medium / high
   - **顯示範圍 (Display range)** — half / 3/4 / full
   - **角色顏色 (Role colors)** — MOD / Subscriber / VIP / General
+  - **恢復預設 (Reset defaults)** — restore all appearance settings to defaults
 
 Changes apply live.
 

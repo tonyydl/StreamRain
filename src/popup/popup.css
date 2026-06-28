@@ -75,3 +75,22 @@ input[type=color] {
 .color-label {
   display: inline-block; width: 70px;
 }
+
+.actions {
+  padding: 10px 14px 0;
+}
+
+button {
+  width: 100%;
+  background: #2d2d33;
+  color: #efeff1;
+  border: 1px solid #3d3d45;
+  border-radius: 4px;
+  padding: 7px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+button:hover {
+  background: #3d3d45;
+}
