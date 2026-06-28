@@ -23,6 +23,8 @@ async function init() {
   const elOpacityVal = document.getElementById('opacity-val');
   const elSpeed      = document.getElementById('speed-select');
   const elFont       = document.getElementById('font-select');
+  const elDensity    = document.getElementById('density-select');
+  const elDisplayRange = document.getElementById('display-range-select');
   const elMod        = document.getElementById('color-mod');
   const elSub        = document.getElementById('color-subscriber');
   const elVip        = document.getElementById('color-vip');
@@ -34,6 +36,8 @@ async function init() {
   elOpacityVal.textContent = elOpacity.value + '%';
   elSpeed.value      = settings.speed;
   elFont.value       = settings.fontSize;
+  elDensity.value    = settings.density;
+  elDisplayRange.value = settings.displayRange;
   elMod.value        = settings.colors.mod;
   elSub.value        = settings.colors.subscriber;
   elVip.value        = settings.colors.vip;
@@ -53,6 +57,12 @@ async function init() {
 
   elFont.addEventListener('change', () =>
     setSettings({ fontSize: elFont.value }));
+
+  elDensity.addEventListener('change', () =>
+    setSettings({ density: elDensity.value }));
+
+  elDisplayRange.addEventListener('change', () =>
+    setSettings({ displayRange: elDisplayRange.value }));
 
   const updateColors = () => setSettings({
     colors: {

@@ -18,7 +18,7 @@ player, and a popup gives you fine-grained control over the look.
 - **Emotes as images** — Twitch native emotes and 7TV emotes (channel + global) render as images in the danmaku, not as text codes.
 - **Shows every message** — no filtering.
 - **In-player toggle** — a `彈` button in the bottom-right corner turns danmaku on/off instantly.
-- **Popup settings** — opacity, speed (slow/medium/fast), font size (small/medium/large), and per-role colors. Settings sync across your browsers via `storage.sync`.
+- **Popup settings** — opacity, speed (slow/medium/fast), font size (small/medium/large), density (low/medium/high), display range (half/3/4/full), and per-role colors. Settings sync across your browsers via `storage.sync`.
 - **Immune to chat extensions** — works whether or not 7TV / BTTV / FFZ are installed (see [How it works](#how-it-works)).
 
 ---
@@ -54,6 +54,8 @@ The extension is not yet on the stores, so load it manually.
   - **透明度 (Opacity)** — 10%–100%
   - **速度 (Speed)** — slow / medium / fast
   - **字體大小 (Font size)** — small / medium / large
+  - **彈幕密度 (Density)** — low / medium / high
+  - **顯示範圍 (Display range)** — half / 3/4 / full
   - **角色顏色 (Role colors)** — MOD / Subscriber / VIP / General
 
 Changes apply live.

@@ -1,5 +1,6 @@
 // DanmakuEngine — consumes a DanmakuOverlay instance and manages a scrolling
-// danmaku track system. Depends on SPEED_MAP, FONT_SIZE_MAP from constants.js.
+// danmaku track system. Depends on SPEED_MAP, FONT_SIZE_MAP, DENSITY_MAP,
+// DISPLAY_RANGE_MAP from constants.js.
 // Loaded as a content script after danmaku-overlay.js.
 
 class DanmakuEngine {
@@ -11,6 +12,8 @@ class DanmakuEngine {
       opacity:  DEFAULT_SETTINGS.opacity,
       speed:    DEFAULT_SETTINGS.speed,
       fontSize: DEFAULT_SETTINGS.fontSize,
+      density:  DEFAULT_SETTINGS.density,
+      displayRange: DEFAULT_SETTINGS.displayRange,
       colors:   { ...DEFAULT_SETTINGS.colors },
     };
     this._fontSizePx = 18;   // cached from FONT_SIZE_MAP; updated in _rebuildTracks
@@ -99,11 +102,25 @@ class DanmakuEngine {
     return base + Math.floor(text.length / 10);
   }
 
+  _densityConfig() {
+    return DENSITY_MAP[this._settings.density] || DENSITY_MAP.medium;
+  }
+
+  _queueLimit() {
+    return this._densityConfig().queueLimit;
+  }
+
+  _usableTrackCount() {
+    const ratio = DISPLAY_RANGE_MAP[this._settings.displayRange] || DISPLAY_RANGE_MAP.threeQuarter;
+    return Math.max(1, Math.ceil(this._tracks.length * ratio));
+  }
+
   _pickTrack() {
     const now = Date.now();
     // prefer the track that became free earliest; return its index or -1
     let bestIdx = -1;
-    for (let i = 0; i < this._tracks.length; i++) {
+    const trackCount = this._usableTrackCount();
+    for (let i = 0; i < trackCount; i++) {
       if (this._tracks[i].freeAt <= now) {
         if (bestIdx === -1 || this._tracks[i].freeAt < this._tracks[bestIdx].freeAt) {
           bestIdx = i;
@@ -114,7 +131,7 @@ class DanmakuEngine {
   }
 
   push(msg) {
-    if (this._queue.length >= 50) this._queue.shift(); // drop oldest
+    if (this._queue.length >= this._queueLimit()) this._queue.shift(); // drop oldest
     this._queue.push(msg);
     this._scheduleDispatch();
   }
