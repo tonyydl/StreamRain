@@ -100,3 +100,11 @@ StreamRain/
 ```
 
 **Tech:** Manifest V3, vanilla JS, CSS `@keyframes`, no build step.
+
+## Tests
+
+Run the Node-based test suite:
+
+```bash
+node test/run-all.js
+```

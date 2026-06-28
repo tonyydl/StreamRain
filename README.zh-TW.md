@@ -96,3 +96,11 @@ StreamRain/
 ```
 
 **技術：** Manifest V3、原生 JavaScript、CSS `@keyframes`，無需建置步驟。
+
+## 測試
+
+執行 Node 測試：
+
+```bash
+node test/run-all.js
+```
