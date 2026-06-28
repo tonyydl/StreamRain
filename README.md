@@ -48,7 +48,7 @@ The extension is not yet on the stores, so load it manually.
 
 ## Usage
 
-- **Toggle danmaku:** click the `彈` button in the bottom-right corner of the player, or use the toggle in the popup.
+- **Toggle danmaku:** click the `彈` button in the bottom-right corner of the player, use the toggle in the popup, or press `Alt+D`.
 - **Adjust appearance:** click the StreamRain toolbar icon to open the popup:
   - **彈幕開關 (Enable)** — master on/off
   - **透明度 (Opacity)** — 10%–100%

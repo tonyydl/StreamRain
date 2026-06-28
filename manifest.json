@@ -27,6 +27,7 @@
         "src/content/danmaku-engine.js",
         "src/content/chat-observer.js",
         "src/content/toggle-button.js",
+        "src/content/keyboard-shortcut.js",
         "src/content/index.js"
       ],
       "css": ["styles/danmaku.css"],

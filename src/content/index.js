@@ -5,6 +5,11 @@
   let buttonReadyObs = null;
   const button = new ToggleButton();
 
+  registerToggleShortcut(async () => {
+    const settings = await getSettings();
+    await setSettings({ enabled: !settings.enabled });
+  });
+
   async function enable(settings) {
     // Cancel the "waiting for player to inject button" observer if it's running
     if (buttonReadyObs) {

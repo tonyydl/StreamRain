@@ -5,6 +5,7 @@ assert.ok(TEST_FILES.includes('chat-observer.test.js'));
 assert.ok(TEST_FILES.includes('danmaku-density.test.js'));
 assert.ok(TEST_FILES.includes('popup-markup.test.js'));
 assert.ok(TEST_FILES.includes('popup-reset.test.js'));
+assert.ok(TEST_FILES.includes('shortcut.test.js'));
 assert.ok(!TEST_FILES.includes('run-all.test.js'));
 
 assert.deepStrictEqual([...TEST_FILES].sort(), TEST_FILES);

@@ -11,6 +11,7 @@ const TEST_FILES = [
   'popup-debounce.test.js',
   'popup-markup.test.js',
   'popup-reset.test.js',
+  'shortcut.test.js',
 ].sort();
 
 function runAll() {
